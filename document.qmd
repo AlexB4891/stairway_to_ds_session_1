@@ -1,0 +1,327 @@
+---
+title: "Miguel, ERGOSTATS y la Toma de Decisiones con Python"
+format: html
+editor: visual
+toc: true
+toc-depth: 3
+execute: 
+  error: true
+---
+
+## La Historia de Miguel
+
+-   **Contexto** 🌍: Miguel, un apasionado miembro de ERGOSTATS 📊, está al frente de un gran desafío en su fábrica de cerveza artesanal 🍻.
+-   **Desafío** 🤔: ¿Debería invertir en nueva maquinaria 🏭? La decisión se basará en el análisis de datos y series de tiempo ⏳.
+-   **Giro** 🔄: Los datos están en GitHub 🌐, cortesía de Alex, gurú de R 🧙‍♂️. ¡Pero Miguel está listo para explorar Python 🐍 y llevar su análisis al siguiente nivel!
+
+## Los datos disponibles
+
+### Compras, ventas e impuestos por sector de actividad
+
+| Variable                               | Tipo                                | Descripción                                                                                       | Etiqueta                                    |
+|-----------------|-----------------|----------------------|-----------------|
+| `anio_fiscal`                          | Numérico (Entero)                   | Año fiscal al que corresponden los datos.                                                         | Año Fiscal                                  |
+| `mes_fiscal`                           | Numérico (Entero)                   | Mes fiscal al que corresponden los datos.                                                         | Mes Fiscal                                  |
+| `tipo_contribuyente`                   | Categórico (Texto)                  | Tipo de contribuyente, en este caso, siempre es "SOCIEDADES".                                     | Tipo de Contribuyente                       |
+| `actividad_economica`                  | Categórico (Texto - CIIU 5 dígitos) | Clasificación de la actividad económica según el Código Internacional Industrial Uniforme (CIIU). | Actividad Económica (CIIU)                  |
+| `impuesto_causado_601`                 | Numérico (Decimal)                  | Monto del impuesto causado por la empresa, etiquetado como 601.                                   | Impuesto Causado (601)                      |
+| `imp_a_pagar_por_percepcion_699`       | Numérico (Decimal)                  | Impuesto a pagar calculado en base a percepciones, etiquetado como 699.                           | Impuesto a Pagar por Percepción (699)       |
+| `imp_a_pagar_por_retencion_799`        | Numérico (Decimal)                  | Impuesto a pagar calculado en base a retenciones, etiquetado como 799.                            | Impuesto a Pagar por Retención (799)        |
+| `total_compras_locales_e_importac_519` | Numérico (Decimal)                  | Total de compras locales e importaciones realizadas por la empresa, etiquetado como 519.          | Total Compras Locales e Importaciones (519) |
+| `total_ventas_y_exportaciones_419`     | Numérico (Decimal)                  | Total de ventas y exportaciones realizadas por la empresa, etiquetado como 419.                   | Total Ventas y Exportaciones (419)          |
+
+> **Archivo:** "data/ts_series_iva.csv"
+
+## Los datos disponibles
+
+### Empresas activas que operan en Pichincha
+
+| Variable      | Tipo               | Descripción                                                                                            | Etiqueta                         |
+|----------------|----------------|------------------------|----------------|
+| `fecha`       | Fecha (`<date>`)   | Fecha correspondiente a los datos recogidos.                                                           | Fecha                            |
+| `nuevas`      | Numérico (Entero)  | Número de empresas que iniciaron actividades en la fecha indicada.                                     | Empresas Nuevas                  |
+| `suspendidas` | Numérico (Entero)  | Número de empresas que suspendieron su RUC de manera indefinida en la fecha indicada.                  | Empresas Suspendidas             |
+| `reingresos`  | Numérico (Entero)  | Número de empresas que reiniciaron actividades en la fecha indicada.                                   | Reingresos de Empresas           |
+| `actividad`   | Categórico (Texto) | Categoría de actividad económica, posiblemente siguiendo la clasificación CIIU.                        | Actividad Económica              |
+| `delta`       | Numérico (Entero)  | Diferencia entre el número de reingresos y el número de empresas suspendidas en la fecha indicada.     | Delta (Reingresos - Suspendidas) |
+| `saldo`       | Numérico (Entero)  | Número total de empresas activas calculadas a partir del número de empresas activas en enero del 2000. | Saldo de Empresas Activas         |
+
+> **Archivo:** "data/ts_series_pichincha.csv" De estos archivos tenemos una versión para cuatro actividades:
+
+## Los datos disponibles
+
+### Actividades de elaboración de alimentos 📊
+
+Información descargada del sistema Saiku del SRI. Para usar estos datos, es importante filtrar y limpiar la información adecuadamente.
+
+-   **C1050**: ELABORACIÓN DE PRODUCTOS LÁCTEOS 🥛
+    -   ¡Vamos desde la vaca 🐄 hasta el consumidor! Esta actividad cubre todo lo relacionado con la transformación de la leche en productos como queso, yogurt y otros derivados lácteos.
+-   **C1071**: ELABORACIÓN DE PRODUCTOS DE PANADERÍA 🍞
+    -   ¡Horneamos felicidad! Aquí entramos al delicioso mundo de los panes, pasteles 🍰, galletas 🍪 y todo tipo de productos de panadería.
+-   **C1103**: ELABORACIÓN DE BEBIDAS MALTEADAS Y DE MALTA 🍺
+    -   De la cebada al bar, cubrimos la producción de cervezas artesanales y otras bebidas fermentadas a partir de malta. ¡Salud!
+
+Información descargada del sistema Saiku del SRI.
+
+> Recuerda, antes de sumergirnos en los datos, necesitamos ponernos nuestros delantales de limpieza de datos 🧼🧹 para asegurarnos de que todo esté en orden para el análisis.
+
+#### La Conexión entre ERGOSTATS, R y Python (10 minutos)
+
+![](https://miro.medium.com/v2/resize:fit:1400/1*MtcjS1OsupH0uzK-V7aBbg.png)
+
+-   **RStudio IDE:** Una casa unificada para R y Python.
+-   **Reticulate Magic:** La magia detrás de la unión es `reticulate`, el paquete de R que teje Python en tu flujo de trabajo de R. 🐍✨
+-   **Análisis Sin Fronteras:** Pasa datos entre R y Python con facilidad, ejecuta código Python en R Markdown y más. 📊🔄
+-   **Integración de R y Python:** Demostrar la eficiencia de usar `pins` en R para compartir datos y cómo estos pueden ser fácilmente accesibles desde Python.
+
+> Para ello nos vamos a **Tools \> Global Options \> Python**
+
+![](images/setup.png)
+
+#### Preparación para el Análisis con Python (15 minutos)
+
+-   **Instalación de Librerías en Python:** Mostrar a los asistentes cómo instalar `pandas` y `requests`.
+-   **Acceso a Datos de GitHub:** Guiar a los asistentes a través del proceso de descargar los datos del repositorio de GitHub a Python.
+
+```{=html}
+<!-- -->
+```
+-   **Instrucciones:**
+
+Abre la terminal o línea de comandos en tu computadora y escribe el siguiente comando:
+
+```         
+python -m pip install pandas numpy seaborn pyreadstat statsmodels prophet janitor
+```
+
+¿Para que instalamos estos módulos?
+
+-   **Pandas y Numpy:** Para manejar y operar con datos.
+-   **Seaborn:** Para visualizaciones de datos.
+-   **Pyreadstat:** Para leer archivos en formato SPSS.
+-   **Statsmodels y Prophet:** Para modelar series de tiempo.
+
+Ahora vamos a cargar los módulos instalados:
+
+```{python}
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import statsmodels.api as sm
+from prophet import Prophet
+import pyreadstat
+from janitor import clean_names
+from pmdarima import auto_arima
+import datetime
+```
+
+Ahora leemos nuestros archivos:
+
+```{python}
+# Empresas activas en Pichincha:
+ts_series_pichincha = pd.read_csv("data/ts_series_pichincha.csv")
+# Datos y series del IVA:
+ts_series_iva = pd.read_csv("data/ts_series_iva.csv")
+# Lacteos:
+ts_series_actividad_C1050 = pd.read_csv("data/ts_series_actividad_C1050.csv")
+# Panadería:
+ts_series_actividad_C1071 = pd.read_csv("data/ts_series_actividad_C1071.csv")
+# Bebidas malteadas y de malta:
+ts_series_actividad_C1103 = pd.read_csv("data/ts_series_actividad_C1103.csv")
+```
+
+Ver la serie de tiempo:
+
+```{python}
+import matplotlib.pyplot as plt
+
+def graficar_serie_tiempo(df, columna, titulo, etiqueta_x, etiqueta_y):
+    # Asegúrate de que la columna de fecha esté en formato datetime
+    df['fecha'] = pd.to_datetime(df['fecha'])
+    
+    # Establece la fecha como el índice del DataFrame
+    df = df.set_index('fecha')
+    
+    # Crea el gráfico
+    plt.figure(figsize=(10, 6))
+    plt.plot(df[columna])
+    
+    # Añade títulos y etiquetas
+    plt.title(titulo)
+    plt.xlabel(etiqueta_x)
+    plt.ylabel(etiqueta_y)
+    
+    # Muestra el gráfico
+    plt.show()
+
+# Usa la función para graficar la columna 'nuevas' del DataFrame 'ts_series_actividad_C1103'
+graficar_serie_tiempo(ts_series_pichincha, 'saldo', 'Empresas activas', 'Fecha', 'Empresas')
+```
+
+```{python}
+
+ts_series_iva.columns
+
+elaboracion_malta = ts_series_iva[(ts_series_iva['actividad_economica'] == "C1103")]
+
+elaboracion_malta["anio_fiscal"] = elaboracion_malta["anio_fiscal"].astype(str)
+
+elaboracion_malta["mes_fiscal"] = elaboracion_malta["mes_fiscal"].astype(str)
+
+elaboracion_malta['dia'] = 1
+
+elaboracion_malta['dia'] = elaboracion_malta['dia'].astype(str)
+
+elaboracion_malta['fecha_str'] = elaboracion_malta['anio_fiscal'] + '-' + elaboracion_malta['mes_fiscal'] + '-' + elaboracion_malta['dia']
+
+elaboracion_malta["fecha"] = pd.to_datetime(elaboracion_malta[['anio_fiscal', 'mes_fiscal','dia']])
+
+graficar_serie_tiempo(elaboracion_malta,'total_ventas_y_exportaciones_419',"Ventas de la elboración de bebidas de malta","Fecha","Dólares")
+```
+
+
+Pero algo no cuadra, mejor veamos el lag:
+
+```{python}
+def crear_variable_lag(df, columna, lag):
+    # Crea una nueva columna que es el valor actual de 'columna' menos su valor 'lag' períodos atrás
+    df[f'{columna}_menos_{lag}'] = df[columna] - df[columna].shift(lag)
+    return df
+
+# Usa la función para crear una nueva columna que es 'nuevas' menos su valor 1 período atrás
+ts_series_pichincha = crear_variable_lag(ts_series_pichincha, 'saldo', 1)
+
+graficar_serie_tiempo(ts_series_pichincha, 'saldo_menos_1', 'Cambio en el núemro de empresas', 'Fecha', 'Empresas')
+```
+Esa serie se ve sospechoza.
+
+
+#### Exploración y Limpieza de Datos (20 minutos)
+
+-   **Inspección de los Datos:** Utilizar `pandas` para cargar y revisar los datos.
+
+```{python}
+def eliminar_valores_faltantes(df, columna):
+    # Elimina los valores faltantes en la columna especificada
+    df = df.dropna(subset=[columna])
+    return df
+
+ts_series_pichincha = eliminar_valores_faltantes(ts_series_pichincha, 'saldo_menos_1')
+  
+```
+
+-   **Limpieza y Preparación:** Enseñar técnicas básicas de limpieza y preparación de datos para el análisis de series de tiempo.
+
+```{python}
+from statsmodels.tsa.seasonal import seasonal_decompose
+
+def descomponer_serie(df, columna, periodo):
+    # Llena los valores faltantes con el valor anterior en la serie de tiempo
+    df.loc[:, columna] = df.loc[:, columna].fillna(method='ffill')
+    
+    # Descompone la serie de tiempo en sus componentes
+    descomposicion = seasonal_decompose(df[columna], period=periodo)
+    
+    # Crea nuevas columnas con los componentes de la descomposición
+    df.loc[:, f'{columna}_tendencia'] = descomposicion.trend
+    df.loc[:, f'{columna}_estacionalidad'] = descomposicion.seasonal
+    df.loc[:, f'{columna}_residuo'] = descomposicion.resid
+    
+    return df
+  
+
+
+ts_series_pichincha = ts_series_pichincha.to_datetime(ts_series_pichincha["fecha"])  
+
+ts_series_pichincha.set_index("fecha", inplace = True)
+
+ts_series_pichincha.resample("M")["saldo"].sum()
+
+ts_series_pichincha = crear_variable_lag(ts_series_pichincha, 'saldo', 1)
+
+ts_series_pichincha = eliminar_valores_faltantes(ts_series_pichincha, 'saldo_menos_1')
+
+# Usa la función para descomponer la columna 'saldo_menos_1'
+# Asegúrate de especificar el periodo correcto para tus datos
+ts_series_pichincha = descomponer_serie(ts_series_pichincha, 'saldo_menos_1', periodo=12)
+
+ts_series_pichincha = ts_series_pichincha.reset_index()
+
+ts_series_pichincha
+
+
+graficar_serie_tiempo(ts_series_pichincha, 'saldo_menos_1_estacionalidad', 'Residuos de la serie', 'Fecha', 'Residuo')
+
+```
+
+
+#### Análisis de Series de Tiempo en Python (30 minutos)
+
+-   **Teoría de Series de Tiempo:** Breve explicación teórica.
+-   **Manos a la Obra:** Miguel, guiado por el instructor, comienza a analizar las tendencias, estacionalidades y otros patrones en los datos.
+-   **Modelado de Pronósticos:** Introducción a modelos como ARIMA o Prophet en Python.
+
+```{python}
+def generar_modelo_arima(df, columna):
+    # Asegúrate de que la columna de fecha esté en formato datetime
+    df['fecha'] = pd.to_datetime(df['fecha'])
+    
+    # Establece la fecha como el índice del DataFrame
+    df = df.set_index('fecha')
+    
+    # Asegúrate de que tu índice de fecha tenga una frecuencia asociada
+    # 'MS' significa inicio de mes. Ajusta esto según tus datos
+    df = df.asfreq('MS')
+    
+     # Elimina las filas con valores NaN
+    df = df.dropna()
+    
+    # Ajusta el modelo ARIMA a los datos
+    modelo = auto_arima(df[columna], seasonal=True, m=12)
+    
+    return modelo
+
+# Usa la función para generar un modelo para la columna 'nuevas'
+modelo = generar_modelo_arima(ts_series_pichincha, 'saldo')
+
+# Imprime los detalles del modelo seleccionado
+print(modelo.summary())
+```
+
+Sacamos las predicciones:
+
+```{python}
+n_periodos = 12
+
+# Genera predicciones
+predicciones = modelo.predict(n_periods=n_periodos)
+
+print(predicciones)
+
+# Genera un índice de fecha para las predicciones
+indice_fechas = pd.date_range(start=predicciones.index[-1], periods=n_periodos, freq='MS')
+
+# Crea un DataFrame para las predicciones
+df_predicciones = pd.DataFrame(data=predicciones, index=indice_fechas, columns=['prediccion'])
+
+print(df_predicciones)
+```
+
+
+#### Toma de Decisiones Basada en Datos (20 minutos)
+
+-   **Calculando el Valor Presente Neto (VPN):** Paso a paso, Miguel calcula el VPN para diferentes escenarios de inversión.
+-   **Visualización de Resultados:** Miguel utiliza gráficas para visualizar los resultados y facilitar la toma de decisiones.
+-   **Evaluación de Escenarios:** Miguel examina las implicaciones de cada escenario de inversión (1 año, 2 años, 5 años).
+
+#### Sesión Interactiva y Preguntas (5 minutos)
+
+-   **Interacción con la Audiencia:** Miguel invita a los asistentes a hacer preguntas y compartir sus opiniones sobre el análisis realizado.
+-   **Consejos Prácticos:** Miguel comparte sus aprendizajes sobre la transición de R a Python y la importancia del análisis de datos en la toma de decisiones empresariales.
+
+#### Conclusiones y Reflexiones Finales (5 minutos)
+
+-   **Lecciones Aprendidas:** Miguel resume las lecciones clave sobre el análisis de series de tiempo y su impacto en las decisiones empresariales.
+-   **Inspiración para la Comunidad ERGOSTATS:** Miguel anima a los miembros de ERGOSTATS a aprovechar la colaboración interdisciplinaria y a explorar nuevos horizontes en el análisis de datos.
